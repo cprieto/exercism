@@ -2,26 +2,24 @@ package raindrops
 
 import (
 	"strconv"
-	"strings"
 )
 
-var factors = map[string]int{
-	"Pling": 3,
-	"Plang": 5,
-	"Plong": 7,
-}
-
 func Convert(input int) string {
-	var builder strings.Builder
-	for k, v := range factors {
-		if mod := input % v; mod == 0 {
-			builder.WriteString(k)
-		}
+	// NOTE: I tried using a map but nothing beats the performance of simple if's
+	var output string
+	if input % 3 == 0 {
+		output += "Pling"
+	}
+	if input % 5 == 0 {
+		output += "Plang"
+	}
+	if input % 7 == 0 {
+		output += "Plong"
 	}
 
-	if builder.Len() > 0 {
-		return builder.String()
-	} else {
+	if output == "" {
 		return strconv.Itoa(input)
+	} else {
+		return output
 	}
 }
