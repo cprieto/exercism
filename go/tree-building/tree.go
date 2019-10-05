@@ -1,8 +1,8 @@
 package tree
 
 import (
-	"sort"
 	"errors"
+	"sort"
 )
 
 type Record struct {
@@ -25,19 +25,37 @@ func Build(input []Record) (*Node, error) {
 	// NOTE: Shortcuts for specific conditions
 	if len(input) == 0 {
 		return nil, nil
-	} else if len(input) == 1 {
-		return &Node{ID: input[0].ID}, nil
 	}
 
 	// NOTE: Now we order the records
 	sort.Sort(byRecord(input))
-	if input[0].ID != 0 {
-		return nil, errors.New("no root node")
+	nodes := make(map[int]*Node)
+
+	if r := input[0]; r.ID != 0 {
+		return nil, errors.New("you need to provide a root node")
+	} else if r.ID == 0 && r.Parent != 0 {
+		return nil, errors.New("Root node should not have a parent")
 	}
 
-	nodes := make(map[int]*Node)
-	for _, r := range input {
+	for i, r := range input {
+		if r.ID != i {
+			return nil, errors.New("non-continous nodes are a bug")
+		} else if _, ok := nodes[r.ID]; ok {
+			return nil, errors.New("no duplicate nodes are allowed")
+		}
 
+		p, ok := nodes[r.Parent]
+
+		if r.ID != 0 && !ok {
+			return nil, errors.New("parent node does not exist")
+		} else if r.ID == 0 {
+			nodes[0] = &Node{ID: 0}
+			continue
+		}
+
+		n := &Node{ID: r.ID}
+		p.Children = append(p.Children, n)
+		nodes[r.ID] = n
 	}
 
 	// NOTE: We only need the root node
