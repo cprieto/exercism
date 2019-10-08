@@ -18,10 +18,10 @@ func Tally(reader io.Reader, writer io.Writer) error {
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
-		text := scanner.Text()
+		text := strings.TrimSpace(scanner.Text())
 
 		// NOTE: Ignore empty entries
-		if text == "" {
+		if text == "" || text[0] == '#' {
 			continue
 		}
 
@@ -74,7 +74,13 @@ func Tally(reader io.Reader, writer io.Writer) error {
 	}
 
 	sort.Slice(teams, func(i, j int) bool {
-		return matches[teams[i]].points > matches[teams[j]].points
+		n1, n2 := teams[i], teams[j]
+		p1, p2 := matches[n1].points, matches[n2].points
+
+		if p1 == p2 {
+			return n1[0] < n2[0]
+		}
+		return p1 > p2
 	})
 
 	if _, err := fmt.Fprintf(writer, "%-30v | %2v | %2v | %2v | %2v | %2v\n", "Team", "MP", "W", "D", "L", "P"); err != nil {
